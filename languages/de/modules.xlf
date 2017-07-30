@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<xliff version="1.1">
+<file datatype="php" original="system/modules/isotope_simple_erp/languages/en/modules.php" source-language="en" target-language="de">
+<body>
+    <trans-unit id="MOD.isotope_simple_erp.0">
+        <source>Isotope simple ERP system</source>
+        <target>Isotope Warenwirtschaft</target>
+    </trans-unit>
+</body>
+</file>
+</xliff>
