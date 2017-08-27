@@ -9,7 +9,8 @@
     ],
     "require": {
         "contao/core-bundle": "4.*",
-        "contao-community-alliance/composer-plugin": "3.*"
+        "contao-community-alliance/composer-plugin": "3.*",
+        "isotope/isotope-core": "^2.4"
     },
     "extra": {
         "contao": {
