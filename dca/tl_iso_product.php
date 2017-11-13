@@ -22,7 +22,7 @@ $GLOBALS['TL_DCA']['tl_iso_product']['fields']['simple_erp_count'] = array(
     'sorting'       => true,
     'inputType'     => 'text',
     'eval'          => array( 'mandatory'=>false, 'tl_class'=>'w50' ),
-    'attributes'    => array( 'legend'=>'general_legend', 'multilingual'=>false, 'fixed'=>true, 'variant_fixed'=>true, 'fe_sorting'=>true, 'fe_search'=>true ),
+    'attributes'    => array( 'legend'=>'general_legend', 'multilingual'=>false, 'fixed'=>true, 'variant_fixed'=>true, 'fe_sorting'=>true ),
     'sql'           => "varchar(255) NOT NULL default ''",
 );
 
@@ -31,6 +31,6 @@ $GLOBALS['TL_DCA']['tl_iso_product']['fields']['simple_erp_disable_on_zero'] = a
     'exclude'       => true,
     'inputType'     => 'checkbox',
     'eval'          => array( 'tl_class'=>'w50' ),
-    'attributes'    => array( 'legend'=>'general_legend', 'fixed'=>true, 'variant_fixed'=>true, 'fe_sorting'=>true, 'fe_search'=>true ),
+    'attributes'    => array( 'legend'=>'general_legend', 'fixed'=>true, 'variant_fixed'=>true ),
     'sql'           => "char(1) NOT NULL default ''",
 );
