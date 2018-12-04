@@ -91,6 +91,27 @@ class SimpleERP extends \System {
 
 
     /**
+     * Prevents setting the quantity in cart higher than given in simple_erp_count
+     *
+     * @param \Isotope\Model\ProductCollectionItem $objItem
+     * @param array $arrSet
+     * @param \Isotope\Model\ProductCollection\Cart $objCart
+     *
+     * @return array
+     */
+    public function updateQtyInCollection($objItem, $arrSet, $objCart) {
+
+        if( $objItem->getProduct()->simple_erp_count > 0 ) {
+            if( array_key_exists('quantity', $arrSet) && $arrSet['quantity'] && $arrSet['quantity'] > $objItem->getProduct()->simple_erp_count ) {
+                $arrSet['quantity'] = $objItem->getProduct()->simple_erp_count;
+            }
+        }
+
+        return $arrSet;
+    }
+
+
+    /**
      * Show messages for new order status
      *
      * @return string
