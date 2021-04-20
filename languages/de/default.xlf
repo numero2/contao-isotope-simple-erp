@@ -2,9 +2,13 @@
 <xliff version="1.1">
 <file datatype="php" original="system/modules/isotope_simple_erp/languages/en/default.php" source-language="en" target-language="de">
 <body>
-    <trans-unit id="MSC.simple_erp_non_avail">
-        <source>There are %s products currently not available anymore</source>
-        <target>Sie haben %s Produkt(e) die aktuell nicht mehr verfügbar sind</target>
+    <trans-unit id="MSC.simpleErpProductOutOfStock">
+        <source>The product "%s" is currently out of stock</source>
+        <target>Das Produkt "%s" ist aktuell nicht verfügbar</target>
+    </trans-unit>
+    <trans-unit id="ERR.simpleErpQuantityNotAvailable">
+      <source>The maximum available quantity for "%s" is %s items.</source>
+      <target>Die maximal verfügbare Bestellmenge für "%s" ist %s Stück.</target>
     </trans-unit>
 </body>
 </file>

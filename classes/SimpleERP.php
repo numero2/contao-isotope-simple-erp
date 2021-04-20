@@ -3,25 +3,28 @@
 /**
  * Contao Open Source CMS
  *
- * Copyright (c) 2005-2017 Leo Feyer
+ * Copyright (c) 2005-2021 Leo Feyer
  *
  * @package   Isotope Simple ERP
  * @author    Benny Born <benny.born@numero2.de>
+ * @author    Michael Bösherz <michael.boesherz@numero2.de>
  * @license   LGPL
- * @copyright 2017 numero2 - Agentur für Internetdienstleistungen
+ * @copyright 2021 numero2 - Agentur für digitales Marketing
  */
 
 
 namespace numero2\IsotopeSimpleERP;
 
+use Contao\System;
 use Isotope\Interfaces\IsotopeProductCollection;
+use Isotope\Message;
 use Isotope\Model\Config;
+use Isotope\Model\Product;
 use Isotope\Model\ProductCollection;
 use Isotope\Model\ProductCollection\Order;
-use Isotope\Model\Product;
 
 
-class SimpleERP extends \System {
+class SimpleERP extends System {
 
 
     /**
@@ -67,23 +70,29 @@ class SimpleERP extends \System {
      *
      * @return boolean
      */
-    public function checkQtyForCollection( Product $objProduct, $intQuantity, IsotopeProductCollection $objCollection ) {
+    public function checkQtyForCollection( Product $objProduct, $intQuantity=0, IsotopeProductCollection $objCollection ) {
 
         if( $objProduct->simple_erp_count > 0 ) {
-
-            // check if we want to add more than we have in stock
-            if( $intQuantity > $objProduct->simple_erp_count ) {
-                return 0;
-            }
 
             // find product in cart to check if the total quantity exceeds our stock
             $oInCart = NULL;
             $oInCart = $objCollection->getItemForProduct($objProduct);
 
-            if( $oInCart && $oInCart->quantity >= $objProduct->simple_erp_count ) {
-                return 0;
-            }
+            if( $oInCart && ($oInCart->quantity+$intQuantity) >= $objProduct->simple_erp_count ) {
 
+                $qtyAddToCart = $objProduct->simple_erp_count-$oInCart->quantity;
+                $qtyAddToCart = $qtyAddToCart<0?0:$qtyAddToCart;
+
+                if( !$qtyAddToCart ) {
+                    Message::addError(sprintf(
+                        $GLOBALS['TL_LANG']['ERR']['simpleErpQuantityNotAvailable']
+                    ,   $objProduct->getName()
+                    ,   $objProduct->simple_erp_count
+                    ));
+                }
+
+                return $qtyAddToCart;
+            }
         }
 
         return $intQuantity;
@@ -101,9 +110,20 @@ class SimpleERP extends \System {
      */
     public function updateQtyInCollection($objItem, $arrSet, $objCart) {
 
-        if( $objItem->getProduct()->simple_erp_count > 0 ) {
-            if( array_key_exists('quantity', $arrSet) && $arrSet['quantity'] && $arrSet['quantity'] > $objItem->getProduct()->simple_erp_count ) {
-                $arrSet['quantity'] = $objItem->getProduct()->simple_erp_count;
+        $objProduct = null;
+        $objProduct = $objItem->getProduct();
+
+        if( $objProduct->simple_erp_count > 0 ) {
+
+            if( array_key_exists('quantity', $arrSet) && $arrSet['quantity'] && $arrSet['quantity'] > $objProduct->simple_erp_count ) {
+
+                $arrSet['quantity'] = $objProduct->simple_erp_count;
+
+                Message::addError(sprintf(
+                    $GLOBALS['TL_LANG']['ERR']['simpleErpQuantityNotAvailable']
+                ,   $objProduct->getName()
+                ,   $objProduct->simple_erp_count
+                ));
             }
         }
 
@@ -120,11 +140,22 @@ class SimpleERP extends \System {
 
         $this->import('Database');
 
-        $objUnavailProducts = NULL;
-        $objUnavailProducts = $this->Database->prepare("SELECT COUNT(id) as num_unavail FROM ".Product::getTable()." WHERE simple_erp_disable_on_zero = '1' AND simple_erp_count = '0'")->execute();
+        $aMessages = [];
 
-        if( $objUnavailProducts->num_unavail ) {
-            return '<p class="tl_error">' . sprintf($GLOBALS['TL_LANG']['MSC']['simple_erp_non_avail'], $objUnavailProducts->num_unavail) . '</p>';
+        $oProducts = null;
+        $oProducts = Product::findBy(['published=?','simple_erp_count=?'],[1,'0']);
+
+        if( $oProducts ) {
+
+            while( $oProducts->next() ) {
+
+                $aMessages[] = '<p class="tl_error">' . sprintf(
+                    $GLOBALS['TL_LANG']['MSC']['simpleErpProductOutOfStock']
+                ,   $oProducts->name
+                ) . '</p>';
+            }
         }
+
+        return implode('',$aMessages);
     }
 }
