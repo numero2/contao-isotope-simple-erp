@@ -70,7 +70,7 @@ class SimpleERP extends System {
      *
      * @return boolean
      */
-    public function checkQtyForCollection( Product $objProduct, $intQuantity=0, IsotopeProductCollection $objCollection ) {
+    public function checkQtyForCollection( Product $objProduct, $intQuantity, IsotopeProductCollection $objCollection ) {
 
         if( $objProduct->simple_erp_count > 0 ) {
 
@@ -143,7 +143,7 @@ class SimpleERP extends System {
         $aMessages = [];
 
         $oProducts = null;
-        $oProducts = Product::findBy(['published=?','simple_erp_count=?'],[1,'0']);
+        $oProducts = Product::findBy(['tl_iso_product.published=?','tl_iso_product.simple_erp_count=?'],[1,'0']);
 
         if( $oProducts ) {
 
