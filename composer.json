@@ -1,6 +1,7 @@
 {
     "name": "numero2/contao-isotope-simple-erp",
     "type": "contao-module",
+    "description": "Most basic ERP system for Isotope eCommerce",
     "license": "LGPL-3.0+",
     "authors": [{
             "name": "numero2 - Agentur für Internetdienstleistungen",
