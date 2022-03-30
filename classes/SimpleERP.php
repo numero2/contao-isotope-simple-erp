@@ -63,7 +63,7 @@ class SimpleERP extends System {
 
 
     /**
-     * Updates the counts on all bought products
+     * Checks if the given quantity exceeds our stock when adding product to cart
      *
      * @param Isotope\Model\Product $objProduct
      * @param Isotope\Model\ProductCollection $objCollection
@@ -72,10 +72,14 @@ class SimpleERP extends System {
      */
     public function checkQtyForCollection( Product $objProduct, $intQuantity, IsotopeProductCollection $objCollection ) {
 
+        if( $objProduct->simple_erp_count === '' ) {
+            return $intQuantity;
+        }
+
         if( $objProduct->simple_erp_count > 0 ) {
 
             // find product in cart to check if the total quantity exceeds our stock
-            $oInCart = NULL;
+            $oInCart = null;
             $oInCart = $objCollection->getItemForProduct($objProduct);
 
             if( $oInCart && ($oInCart->quantity+$intQuantity) >= $objProduct->simple_erp_count ) {
@@ -92,10 +96,13 @@ class SimpleERP extends System {
                 }
 
                 return $qtyAddToCart;
+
+            } else {
+                return $intQuantity;
             }
         }
 
-        return $intQuantity;
+        return false;
     }
 
 
