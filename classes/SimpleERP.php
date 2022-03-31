@@ -72,7 +72,7 @@ class SimpleERP extends System {
      */
     public function checkQtyForCollection( Product $objProduct, $intQuantity, IsotopeProductCollection $objCollection ) {
 
-        if( $objProduct->simple_erp_count === '' ) {
+        if( $objProduct->simple_erp_count === '' || $objProduct->simple_erp_count === null ) {
             return $intQuantity;
         }
 
