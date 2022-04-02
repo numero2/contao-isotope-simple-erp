@@ -53,7 +53,7 @@ class SimpleERP extends System {
                 if( $objProduct->simple_erp_disable_on_zero && $objProduct->simple_erp_count <= 0 ) {
 
                     $objProduct->simple_erp_count = 0;
-                    $objProduct->published = 0;
+                    $objProduct->published = '';
                     
                     \Database::getInstance()->prepare("UPDATE ".Product::getTable()." SET simple_erp_count = ?, published = ? WHERE id = ?")->execute( $objProduct->simple_erp_count, $objProduct->published, $objProduct->id );
 
