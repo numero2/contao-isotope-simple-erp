@@ -51,12 +51,16 @@ class SimpleERP extends System {
 
                 // set product suppressed if there is no quantity left and the option is checked
                 if( $objProduct->simple_erp_disable_on_zero && $objProduct->simple_erp_count <= 0 ) {
+
                     $objProduct->simple_erp_count = 0;
                     $objProduct->published = 0;
-                }
+                    
+                    \Database::getInstance()->prepare("UPDATE ".Product::getTable()." SET simple_erp_count = ?, published = ? WHERE id = ?")->execute( $objProduct->simple_erp_count, $objProduct->published, $objProduct->id );
 
-                // update product
-                \Database::getInstance()->prepare("UPDATE ".Product::getTable()." SET simple_erp_count = ?, published = ? WHERE id = ?")->execute( $objProduct->simple_erp_count, $objProduct->published, $objProduct->id );
+                } else {
+
+                    \Database::getInstance()->prepare("UPDATE ".Product::getTable()." SET simple_erp_count = ? WHERE id = ?")->execute( $objProduct->simple_erp_count, $objProduct->id );
+                }
             }
         }
     }
