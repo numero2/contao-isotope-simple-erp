@@ -22,9 +22,9 @@ $GLOBALS['TL_DCA']['tl_iso_product']['fields']['simple_erp_count'] = array(
     'filter'        => true,
     'sorting'       => true,
     'inputType'     => 'text',
-    'eval'          => [ 'mandatory'=>false, 'tl_class'=>'w50' ],
-    'attributes'    => [ 'legend'=>'general_legend', 'multilingual'=>false, 'fe_sorting'=>true ],
-    'sql'           => "varchar(255) NOT NULL default ''",
+    'eval'          => ['mandatory' => false, 'tl_class' => 'w50'],
+    'attributes'    => ['legend' => 'general_legend', 'multilingual' => false, 'fe_sorting' => true],
+    'sql'           => "varchar(255) NOT NULL default 0",
 );
 
 $GLOBALS['TL_DCA']['tl_iso_product']['fields']['simple_erp_disable_on_zero'] = array(
@@ -32,7 +32,11 @@ $GLOBALS['TL_DCA']['tl_iso_product']['fields']['simple_erp_disable_on_zero'] = a
     'exclude'       => true,
     'filter'        => true,
     'inputType'     => 'checkbox',
-    'eval'          => [ 'tl_class'=>'w50' ],
-    'attributes'    => [ 'legend'=>'general_legend' ],
+    'eval'          => ['tl_class' => 'w50'],
+    'attributes'    => ['legend' => 'general_legend'],
     'sql'           => "char(1) NOT NULL default ''",
 );
+
+$GLOBALS['TL_DCA']['tl_iso_product']['fields']['cssID']['exclude'] = true;
+$GLOBALS['TL_DCA']['tl_iso_product']['fields']['cssID']['filter'] = true;
+$GLOBALS['TL_DCA']['tl_iso_product']['fields']['cssID']['search'] = true;
