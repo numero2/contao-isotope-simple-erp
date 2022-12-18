@@ -205,8 +205,8 @@ class SimpleERP extends System
     }
 
 
-    /**
-     * Show messages for products with 'no quantity available' if 'suppress on zero' and yet published 
+     /**
+     * Show messages  
      *
      * @return string
      */
@@ -217,8 +217,24 @@ class SimpleERP extends System
 
         $aMessages = [];
 
+        // Show messages for products with 'no quantity available' if 'suppress on zero' and yet published 
         $oProducts = null;
         $oProducts = Product::findBy(['simple_erp_disable_on_zero=?', 'tl_iso_product.published=?', 'tl_iso_product.simple_erp_count=?'], [1, 1, '0']);
+
+        if ($oProducts) {
+
+            while ($oProducts->next()) {
+
+                $aMessages[] = '<p class="tl_error">' . sprintf(
+                    $GLOBALS['TL_LANG']['MSC']['simpleErpProductOutOfStock'],
+                    $oProducts->name
+                ) . '</p>';
+            }
+        }
+
+        // Show messages for products with cssID = 'reserved' or 'outOfStock' and yet simple_erp_count > 0 
+        $oProducts = null;
+        $oProducts = Product::findBy(['tl_iso_product.simple_erp_count>?'], [0]);
 
         if ($oProducts) {
 
