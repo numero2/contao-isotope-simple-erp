@@ -1,23 +1,33 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.1">
-<file datatype="php" original="system/modules/isotope_simple_erp/languages/en/tl_iso_product.php" source-language="en" target-language="de">
-<body>
-    <trans-unit id="tl_iso_product.simple_erp_count.0">
-        <source>Quantity available</source>
-        <target>Verfügbare Anzahl</target>
-    </trans-unit>
-    <trans-unit id="tl_iso_product.simple_erp_count.1">
-        <source>Please enter the available quantity for this product.</source>
-        <target>Geben Sie hier die noch verfügbare Anzahl ein.</target>
-    </trans-unit>
-    <trans-unit id="tl_iso_product.simple_erp_disable_on_zero.0">
-        <source>Suppress on zero?</source>
-        <target>Bei Null abschalten?</target>
-    </trans-unit>
-    <trans-unit id="tl_iso_product.simple_erp_disable_on_zero.1">
-        <source>Suppress this product if quantity is zero.</source>
-        <target>Bei einer verfügbaren Anzahl von 0 soll der Artikel nicht mehr erscheinen.</target>
-    </trans-unit>
-</body>
-</file>
+    <file datatype="php"
+        original="system/modules/isotope_simple_erp/languages/en/tl_iso_product.php"
+        source-language="en" target-language="de">
+        <body>
+            <trans-unit id="tl_iso_product.simple_erp_count.0">
+                <source>Quantity available</source>
+                <target>Verfügbare Anzahl</target>
+            </trans-unit>
+            <trans-unit id="tl_iso_product.simple_erp_count.1">
+                <source>Please enter the available quantity for this product.</source>
+                <target>Geben Sie hier die noch verfügbare Anzahl ein.</target>
+            </trans-unit>
+            <trans-unit id="tl_iso_product.simple_erp_disable_on_zero.0">
+                <source>Suppress on zero?</source>
+                <target>Bei Null abschalten?</target>
+            </trans-unit>
+            <trans-unit id="tl_iso_product.simple_erp_disable_on_zero.1">
+                <source>Suppress this product if quantity is zero.</source>
+                <target>Bei einer verfügbaren Anzahl von 0 soll der Artikel nicht mehr erscheinen.</target>
+            </trans-unit>
+            <trans-unit id="tl_iso_product.simple_erp_availability.0">
+                <source>Available for sale?</source>
+                <target>Verfügbar zum Verkauf?</target>
+            </trans-unit>
+            <trans-unit id="tl_iso_product.simple_erp_availability.1">
+                <source>Is this product available for sale?</source>
+                <target>Steht das Produkt zum Verkauf?</target>
+            </trans-unit>
+        </body>
+    </file>
 </xliff>
