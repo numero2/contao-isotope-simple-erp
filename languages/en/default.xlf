@@ -1,13 +1,20 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <xliff version="1.1">
-<file datatype="php" original="system/modules/isotope_simple_erp/languages/en/default.php" source-language="en">
-<body>
-    <trans-unit id="MSC.simpleErpProductOutOfStock">
-        <source>The product "%s" is currently out of stock</source>
-    </trans-unit>
-    <trans-unit id="ERR.simpleErpQuantityNotAvailable">
-      <source>The maximum available quantity for "%s" is %s items.</source>
-    </trans-unit>
-</body>
-</file>
+    <file datatype="php" original="system/modules/isotope_simple_erp/languages/en/default.php"
+        source-language="en">
+        <body>
+            <trans-unit id="MSC.simpleErpProductOutOfStock">
+                <source>The product "%s" is currently out of stock</source>
+            </trans-unit>
+            <trans-unit id="ERR.simpleErpQuantityNotAvailable">
+                <source>The maximum available quantity for "%s" is %s items.</source>
+            </trans-unit>
+            <trans-unit id="MSC.0">
+                <source>not available</source>
+            </trans-unit>
+            <trans-unit id="MSC.1">
+                <source>available</source>
+            </trans-unit>
+        </body>
+    </file>
 </xliff>
