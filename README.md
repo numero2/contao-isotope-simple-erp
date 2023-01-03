@@ -7,12 +7,29 @@ About
 --
 Most basic ERP system for Isotope eCommerce.
 
-When bought, the products "availability" counter gets decreased.
-If configured, products will be automatically suppressed once no quantity is available.
+An availability-flag `Available for sale?` can be used to mark products as available or unavailable and can be selected as a product-filter. 
 
-If a product has a limited quantity configured the users won't be able to put more in their cart as there is in total.
+An availability-counter `Quantity available` gives the number of items a product has left.
 
-There is a simple message in backend which lets you know how many products are currently unavailable.
+Additionally css classes (`cssID`) "reserved" and "outOfStock" allow special styling (f.i. hide cart-button).
+
+
+When bought, the products availability-counter gets decreased. Once no quantity remains available, the product will be marked as unavailable and gets the css class 'outOfStock'. If configured (`Suppress on zero?`), a product will be automatically disabled once no quantity is available.
+
+
+If a product has a limited quantity configured the users won't be able to put more in their cart as there is in total. Also a product with items in cart will be marked as unavailable and gets a css class "reserved", if there is no remaining quantity. 
+
+
+There is a message in backend listing products, that have been marked unavailable but do have a non-zero quantity. (This can happen if items are or have been in cart and not yet sold.)  
+
+If configured (`Suppress on zero?`), there will be another message in backend listing products, that are out of stock but not disabled. 
+
+
+Configuration
+--
+* Make sure to activate `Quantity available` in your product type. 
+* Depending on your needs you may want to also activate `Available for sale?`, `cssID` or `Suppress on zero?` in your product type.
+
 
 System requirements
 --
@@ -26,7 +43,6 @@ Installation & Configuration
 * Create a folder named `isotope_simple_erp` in `system/modules`
 * Clone this repository into the new folder
 * Run a database update via the Installtool
-* Make sure to activate `Quantity available` and `Suppress on zero?` in your product type
 
 **Additional step for Contao 4.X:**
 Open `app/AppKernel.php` and add the following line to the $bundles array
