@@ -24,42 +24,79 @@ use Isotope\Model\ProductCollection;
 use Isotope\Model\ProductCollection\Order;
 
 
-class SimpleERP extends System {
+class SimpleERP extends System
+{
+    private $unavailable = '0';
+
+
+    /** 
+     * Sets a class $sCssClass.
+     * 
+     * css classes are kept in the second entry of a serialized field.
+     *
+     * @return none
+     */
+    private function setCssID(string &$serCssID, string $sCssClass)
+    {
+        $aCssID = unserialize($serCssID);
+        if (!$aCssID or !in_array($sCssClass, $aCssID)) {
+            $aCssID[] =  $sCssClass;
+        }
+        $serCssID = serialize($aCssID);
+    }
 
 
     /**
-     * Updates the counts on all bought products
+     * Updates the counts. Marks as 'unavailable' retr. "outOfStock" on all bought products with no remaining quantity
      *
      * @param Isotope\Model\ProductCollection $objOrder
      *
      * @return none
      */
-    public function updateProductCount( IsotopeProductCollection $objOrder ) {
-
-        if( empty($objOrder->id) )
+    public function updateProductCount(IsotopeProductCollection $objOrder)
+    {
+        if (empty($objOrder->id))
             return false;
 
-        foreach( $objOrder->getItems() as $objItem ) {
+        foreach ($objOrder->getItems() as $objItem) {
 
             $objProduct = NULL;
             $objProduct = $objItem->getProduct(true);
 
-            if( !empty($objProduct->simple_erp_count) && $objProduct->simple_erp_count > 0 ) {
+            if (!empty($objProduct->simple_erp_count) && $objProduct->simple_erp_count > 0) {
 
                 // decrease available quantity
                 $objProduct->simple_erp_count = $objProduct->simple_erp_count - $objItem->quantity;
 
-                // set product suppressed if there is no quantity left and the option is checked
-                if( $objProduct->simple_erp_disable_on_zero && $objProduct->simple_erp_count <= 0 ) {
+                // set product suppressed, unavailable, css class outOfStock and quantity zero if there is no quantity left and the option is checked
+                if ($objProduct->simple_erp_disable_on_zero && $objProduct->simple_erp_count <= 0) {
 
                     $objProduct->simple_erp_count = 0;
                     $objProduct->published = '';
-                    
-                    \Database::getInstance()->prepare("UPDATE ".Product::getTable()." SET simple_erp_count = ?, published = ? WHERE id = ?")->execute( $objProduct->simple_erp_count, $objProduct->published, $objProduct->id );
 
-                } else {
+                    //sets class "outOfStock" 
+                    $serCssID = $objProduct->cssID;
+                    $this->setCssID($serCssID, 'outOfStock');
 
-                    \Database::getInstance()->prepare("UPDATE ".Product::getTable()." SET simple_erp_count = ? WHERE id = ?")->execute( $objProduct->simple_erp_count, $objProduct->id );
+                    \Database::getInstance()->prepare("UPDATE " . Product::getTable() . " SET simple_erp_count = ?, published = ?, simple_erp_availability = ?, cssID = ?  WHERE id = ?")->execute($objProduct->simple_erp_count, $objProduct->published, $this->unavailable, $serCssID, $objProduct->id);
+                }
+
+                // set unavailable, css class 'outOfStock' and quantity zero if there is no quantity left
+                elseif ($objProduct->simple_erp_count <= 0) {
+
+                    $objProduct->simple_erp_count = 0;
+
+                    //concatenate class "outOfStock" to previously existing css-classes
+                    $serCssID = $objProduct->cssID;
+                    $this->setCssID($serCssID, 'outOfStock');
+
+                    \Database::getInstance()->prepare("UPDATE " . Product::getTable() . " SET simple_erp_count = ?,  simple_erp_availability = ?, cssID = ?  WHERE id = ?")->execute($objProduct->simple_erp_count, $this->unavailable, $serCssID, $objProduct->id);
+                }
+
+                // just set new quantity in any other case
+                else {
+
+                    \Database::getInstance()->prepare("UPDATE " . Product::getTable() . " SET simple_erp_count = ? WHERE id = ?")->execute($objProduct->simple_erp_count, $objProduct->id);
                 }
             }
         }
@@ -67,44 +104,70 @@ class SimpleERP extends System {
 
 
     /**
-     * Checks if the given quantity exceeds our stock when adding product to cart
+     * Checks if the requested quantity exceeds our stock when adding product to cart.
+     * Reduce requested quantity if neccessary; set unavailable and css class "reserved" if applicable
      *
      * @param Isotope\Model\Product $objProduct
      * @param Isotope\Model\ProductCollection $objCollection
      *
      * @return boolean
      */
-    public function checkQtyForCollection( Product $objProduct, $intQuantity, IsotopeProductCollection $objCollection ) {
+    public function checkQtyForCollection(Product $objProduct, $intQuantity, IsotopeProductCollection $objCollection)
+    {
 
-        if( $objProduct->simple_erp_count === '' || $objProduct->simple_erp_count === null ) {
+        if ($objProduct->simple_erp_count === '' || $objProduct->simple_erp_count === null) {
             return $intQuantity;
         }
 
-        if( $objProduct->simple_erp_count > 0 ) {
+        if ($objProduct->simple_erp_count > 0) {
 
-            // find product in cart to check if the total quantity exceeds our stock
+            // find product in cart 
             $oInCart = null;
             $oInCart = $objCollection->getItemForProduct($objProduct);
+            $qtyInCart = $oInCart->quantity ?? 0;   //quantity already in cart
 
-            if( $oInCart && ($oInCart->quantity+$intQuantity) >= $objProduct->simple_erp_count ) {
+            // remaining quantity to be requested
+            $qtyAddToCart = $objProduct->simple_erp_count - $qtyInCart;
+            $qtyAddToCart = $qtyAddToCart < 0 ? 0 : $qtyAddToCart;  // min. zero
 
-                $qtyAddToCart = $objProduct->simple_erp_count-$oInCart->quantity;
-                $qtyAddToCart = $qtyAddToCart<0?0:$qtyAddToCart;
+            // remaining quantity <= newly requested quantity: set 'unavailable' and css-class "reserved"
+            if ($qtyAddToCart <= $intQuantity) {
 
-                if( !$qtyAddToCart ) {
+                // set new class "reserved" 
+                $serCssID = $objProduct->cssID;
+                $this->setCssID($serCssID, 'reserved');
+                \Database::getInstance()->prepare("UPDATE " . Product::getTable() . " SET simple_erp_availability = ?,  cssID = ?  WHERE id = ?")->execute($this->unavailable, $serCssID, $objProduct->id);
+
+                // remaining quantity < demanded quantity: message warns about the decrease in order
+                if ($qtyAddToCart < $intQuantity) {
+
                     Message::addError(sprintf(
-                        $GLOBALS['TL_LANG']['ERR']['simpleErpQuantityNotAvailable']
-                    ,   $objProduct->getName()
-                    ,   $objProduct->simple_erp_count
+                        $GLOBALS['TL_LANG']['ERR']['simpleErpQuantityNotAvailable'],
+                        $objProduct->getName(),
+                        $objProduct->simple_erp_count
                     ));
                 }
 
-                return $qtyAddToCart;
+                return $qtyAddToCart; // full or reduced request into cart
+            }
 
-            } else {
-                return $intQuantity;
+            // more quantity remaining than requested
+            else {
+                return $intQuantity; // full request into cart
             }
         }
+
+        // Product out of stock ($objProduct->simple_erp_count = 0):
+
+        // set new class "outOfStock"
+        $serCssID = $objProduct->cssID;
+        $this->setCssID($serCssID, 'outOfStock');
+        \Database::getInstance()->prepare("UPDATE " . Product::getTable() . " SET simple_erp_availability = ?,  cssID = ?  WHERE id = ?")->execute($this->unavailable, $serCssID, $objProduct->id);
+
+        Message::addError(sprintf(
+            $GLOBALS['TL_LANG']['MSC']['simpleErpProductOutOfStock'],
+            $objProduct->getName()
+        ));
 
         return false;
     }
@@ -119,21 +182,22 @@ class SimpleERP extends System {
      *
      * @return array
      */
-    public function updateQtyInCollection($objItem, $arrSet, $objCart) {
+    public function updateQtyInCollection($objItem, $arrSet, $objCart)
+    {
 
         $objProduct = null;
         $objProduct = $objItem->getProduct();
 
-        if( $objProduct->simple_erp_count > 0 ) {
+        if ($objProduct->simple_erp_count > 0) {
 
-            if( array_key_exists('quantity', $arrSet) && $arrSet['quantity'] && $arrSet['quantity'] > $objProduct->simple_erp_count ) {
+            if (array_key_exists('quantity', $arrSet) && $arrSet['quantity'] && $arrSet['quantity'] > $objProduct->simple_erp_count) {
 
                 $arrSet['quantity'] = $objProduct->simple_erp_count;
 
                 Message::addError(sprintf(
-                    $GLOBALS['TL_LANG']['ERR']['simpleErpQuantityNotAvailable']
-                ,   $objProduct->getName()
-                ,   $objProduct->simple_erp_count
+                    $GLOBALS['TL_LANG']['ERR']['simpleErpQuantityNotAvailable'],
+                    $objProduct->getName(),
+                    $objProduct->simple_erp_count
                 ));
             }
         }
@@ -143,30 +207,48 @@ class SimpleERP extends System {
 
 
     /**
-     * Show messages for new order status
+     * Show messages  
      *
      * @return string
      */
-    public function getSystemMessages() {
+    public function getSystemMessages()
+    {
 
         $this->import('Database');
 
         $aMessages = [];
 
+        // Show messages for products with 'no quantity available' if 'suppress on zero' and yet published 
         $oProducts = null;
-        $oProducts = Product::findBy(['tl_iso_product.published=?','tl_iso_product.simple_erp_count=?'],[1,'0']);
+        $oProducts = Product::findBy(['simple_erp_disable_on_zero=?', 'tl_iso_product.published=?', 'tl_iso_product.simple_erp_count=?'], [1, 1, '0']);
 
-        if( $oProducts ) {
+        if ($oProducts) {
 
-            while( $oProducts->next() ) {
+            while ($oProducts->next()) {
 
                 $aMessages[] = '<p class="tl_error">' . sprintf(
-                    $GLOBALS['TL_LANG']['MSC']['simpleErpProductOutOfStock']
-                ,   $oProducts->name
+                    $GLOBALS['TL_LANG']['MSC']['simpleErpProductOutOfStock'],
+                    $oProducts->name
                 ) . '</p>';
             }
         }
 
-        return implode('',$aMessages);
+        // Show messages for unavailable products and yet simple_erp_count > 0 
+        // Can happen if items in cart and not yet sold
+        $oProducts = null;
+        $oProducts = Product::findBy(['tl_iso_product.simple_erp_count>?', 'tl_iso_product.simple_erp_availability=?'], ['0', '0']);
+
+        if ($oProducts) {
+
+            while ($oProducts->next()) {
+
+                $aMessages[] = '<p class="tl_error">' . sprintf(
+                    $GLOBALS['TL_LANG']['MSC']['simpleErpProductOutOfStock'],
+                    $oProducts->name
+                ) . '</p>';
+            }
+        }
+
+        return implode('', $aMessages);
     }
 }
